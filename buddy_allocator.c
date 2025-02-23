@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "./buddy_allocator_util.h"
+#include "./util/buddy_allocator_util.h"
 
 void buddy_allocator_init()
 {
@@ -21,7 +21,7 @@ void buddy_allocator_init()
  *
  * algorithm:
  * if the free list contains elements of that order, we should just use that block
- * and updaate the allocation map and remove from the free list. yay for doubly
+ * and update the allocation map and remove from the free list. yay for doubly
  * linked lists.
  *
  * if the free list is empty, that means we need to increase in order until
@@ -91,11 +91,18 @@ void free_blocks(void *addr, size_t order)
     {
         size_t index = find_block_index(addr, order);
         // mark this block as free in the allocation map
-
-        // check if buddy is free
-        size_t buddy_index = index % 2 == 0 ? index + 1 : index - 1;
         // remove buddy from free list
-        page_t *buddy_addr = (char *)addr + ((1 << order) * PAGE_SIZE);
+        void *buddy_addr = NULL;
+        if (!(index % 2))
+        {
+            buddy_addr = (char *)addr + ((1 << order) * PAGE_SIZE);
+        }
+        else
+        {
+            buddy_addr = (char *)addr - ((1 << order) * PAGE_SIZE);
+            // set the index to be the start of the now coalesced chunk
+            index -= 1;
+        }
         if (!is_allocated(buddy_addr, order))
         {
             remove_block_from_free_list(buddy_addr, order);

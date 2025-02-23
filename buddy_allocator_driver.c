@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "./buddy_allocator.h"
+#include "./util/buddy_allocator.h"
 
 int main()
 {

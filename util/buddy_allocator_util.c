@@ -2,21 +2,30 @@
 
 #include "./buddy_allocator_util.h"
 
-size_t find_block_index(page_t *block, size_t order)
+void find_num_elements_in_level_and_size(size_t order, size_t *size_of_blocks, size_t *num_elements_in_level)
 {
     size_t current_size = 1 << order;
-    // TODO: is division the best thing to do here?
     size_t num_elements_level = MAX_SIZE / current_size;
     size_t curr_size_of_blocks = ((MAX_SIZE)*PAGE_SIZE) / num_elements_level;
+    if (size_of_blocks)
+        *size_of_blocks = curr_size_of_blocks;
+    if (num_elements_in_level)
+        *num_elements_in_level = num_elements_level;
+}
+
+size_t find_block_index(page_t *block, size_t order)
+{
+    size_t curr_size_of_blocks;
+    find_num_elements_in_level_and_size(order, &curr_size_of_blocks, NULL);
     size_t index = ((char *)block - (char *)mem_area_start) / (curr_size_of_blocks);
+    return index;
 }
 
 page_t *split_block(page_t *block, size_t order)
 {
-    // TODO: fix this
-    size_t current_size = 1 << order;
-    size_t num_elements_level = MAX_SIZE / current_size;
-    size_t curr_size_of_blocks = ((MAX_SIZE)*PAGE_SIZE) / num_elements_level;
+    size_t num_elements_level;
+    size_t curr_size_of_blocks;
+    find_num_elements_in_level_and_size(order, &curr_size_of_blocks, &num_elements_level);
 
     size_t index = find_block_index(block, order);
     size_t index_buddy = index + 1;
@@ -109,29 +118,25 @@ void insert_free_block(size_t order, page_t *block)
 // assuming index is already correct
 void mark_allocated_or_not(page_t *block, size_t order)
 {
-    size_t current_size = 1 << order;
-    size_t num_elements_level = MAX_SIZE / current_size;
+    size_t num_elements_level;
+    find_num_elements_in_level_and_size(order, NULL, &num_elements_level);
     size_t index = find_block_index(block, order);
 
-    size_t num_bits = num_elements_level / 2;
     size_t bit = 1 << (index / 2);
     long map = all_free_areas[order].allocation_map;
     map ^= bit;
 
-    size_t get_that_bit = (bit & map) >> (index / 2);
     all_free_areas[order].allocation_map = map;
 }
 
 int is_allocated(page_t *block, size_t order)
 {
-    size_t current_size = 1 << order;
-    size_t num_elements_level = MAX_SIZE / current_size;
+    size_t num_elements_level;
+    find_num_elements_in_level_and_size(order, NULL, &num_elements_level);
     size_t index = find_block_index(block, order);
 
-    size_t num_bits = num_elements_level / 2;
     size_t bit = 1 << (index / 2);
     long map = all_free_areas[order].allocation_map;
-    map ^= bit;
 
     size_t get_that_bit = (bit & map) >> (index / 2);
     return get_that_bit;
