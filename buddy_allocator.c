@@ -100,8 +100,8 @@ void free_blocks(void *addr, size_t order)
         else
         {
             buddy_addr = (char *)addr - ((1 << order) * PAGE_SIZE);
-            // set the index to be the start of the now coalesced chunk
-            index -= 1;
+            // set the addr to be the beginning of the coalesced chunk
+            addr = buddy_addr;
         }
         if (!is_allocated(buddy_addr, order))
         {
