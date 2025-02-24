@@ -10,6 +10,6 @@ int is_allocated(page_t *block, size_t order);
 
 page_t *remove_first_block_from_free_list(size_t order);
 void remove_block_from_free_list(page_t *block, size_t order);
-void insert_free_block(size_t order, page_t *block);
+void insert_free_block(page_t *block, size_t order);
 page_t *split_block(page_t *block, size_t order);
 size_t find_block_index(page_t *block, size_t order);

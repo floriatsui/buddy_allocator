@@ -2,6 +2,8 @@
 
 #include "./util/buddy_allocator.h"
 
+// TODO: write a REPL program that takes in commands and allocations
+//       one of those commands should be a visualization tool
 int main()
 {
     buddy_allocator_init();
@@ -13,4 +15,6 @@ int main()
         printf("Number stored in allocated block: %d\n", addr[i]);
 
     int *addr_2 = (int *)alloc_block(0);
+    free_blocks(addr_2, 0);
+    free_blocks(addr, 0);
 }

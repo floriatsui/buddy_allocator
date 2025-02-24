@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stddef.h>
 
 #include "./buddy_allocator_util.h"
@@ -73,7 +74,7 @@ page_t *remove_first_block_from_free_list(size_t order)
         set_backward_link(next_block, prev_block);
         set_forward_link(prev_block, next_block);
     }
-
+    assert(all_free_areas[order].nr_free);
     all_free_areas[order].nr_free -= 1;
     mark_allocated_or_not(block_to_remove, order);
     return block_to_remove;
@@ -94,6 +95,7 @@ void remove_block_from_free_list(page_t *block, size_t order)
         set_forward_link(prev_block, next_block);
     }
     mark_allocated_or_not(block, order);
+    assert(all_free_areas[order].nr_free);
     all_free_areas[order].nr_free -= 1;
 }
 
