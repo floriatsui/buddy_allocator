@@ -15,6 +15,11 @@ void buddy_allocator_init()
     all_free_areas[MAX_ORDER - 1].nr_free = 1;
 }
 
+void buddy_allocator_terminate()
+{
+    free(mem_area_start);
+}
+
 /**
  * order: means that we will allocate 2^order number of pages of PAGE_SIZE
  *        in other words, 2^order * PAGE_SIZE
@@ -87,7 +92,7 @@ alloc_block(size_t order)
  */
 void free_blocks(void *addr, size_t order)
 {
-    while (1)
+    while (order < MAX_ORDER - 1)
     {
         size_t index = find_block_index(addr, order);
         // mark this block as free in the allocation map
@@ -103,7 +108,10 @@ void free_blocks(void *addr, size_t order)
             // set the addr to be the beginning of the coalesced chunk
             addr = buddy_addr;
         }
-        if (!is_allocated(buddy_addr, order))
+        // is_allocated returning:
+        // 0 --> both buddies are allocated
+        // 1 --> only one buddy is allocated (aka the one that is being freed right now)
+        if (is_allocated(buddy_addr, order))
         {
             remove_block_from_free_list(buddy_addr, order);
             // increase the order
