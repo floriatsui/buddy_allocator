@@ -2,11 +2,12 @@
 
 #include "./buddy_allocator_util.h"
 
+/* BLOCK UTILITIES */
 void find_num_elements_in_level_and_size(size_t order, size_t *size_of_blocks, size_t *num_elements_in_level)
 {
     size_t current_size = 1 << order;
     size_t num_elements_level = MAX_SIZE / current_size;
-    size_t curr_size_of_blocks = ((MAX_SIZE)*PAGE_SIZE) / num_elements_level;
+    size_t curr_size_of_blocks = current_size * PAGE_SIZE;
     if (size_of_blocks)
         *size_of_blocks = curr_size_of_blocks;
     if (num_elements_in_level)
@@ -33,24 +34,25 @@ page_t *split_block(page_t *block, size_t order)
     return addr_of_buddy;
 }
 
+/* FREE LIST UTILITIES */
 void set_forward_link(page_t *free_block, page_t *link)
 {
-    ((void **)free_block->payload)[0] = link;
+    ((page_t **)free_block->payload)[0] = link;
 }
 
 void set_backward_link(page_t *free_block, page_t *link)
 {
-    ((void **)free_block->payload)[1] = link;
+    ((page_t **)free_block->payload)[1] = link;
 }
 
 page_t *get_forward_link(page_t *free_block)
 {
-    return (page_t *)((void **)free_block->payload)[0];
+    return ((page_t **)free_block->payload)[0];
 }
 
 page_t *get_backward_link(page_t *free_block)
 {
-    return (page_t *)((void **)free_block->payload)[1];
+    return ((page_t **)free_block->payload)[1];
 }
 
 page_t *remove_first_block_from_free_list(size_t order)
@@ -95,7 +97,7 @@ void remove_block_from_free_list(page_t *block, size_t order)
     all_free_areas[order].nr_free -= 1;
 }
 
-void insert_free_block(size_t order, page_t *block)
+void insert_free_block(page_t *block, size_t order)
 {
     page_t *old_free = all_free_areas[order].free_list_head;
     all_free_areas[order].free_list_head = block;
@@ -113,9 +115,10 @@ void insert_free_block(size_t order, page_t *block)
         set_forward_link(block, block);
         set_backward_link(block, block);
     }
+    mark_allocated_or_not(block, order);
 }
 
-// assuming index is already correct
+/* ALLOCATION UTILITIES */
 void mark_allocated_or_not(page_t *block, size_t order)
 {
     size_t num_elements_level;
