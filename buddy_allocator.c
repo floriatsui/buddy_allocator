@@ -8,11 +8,19 @@ void buddy_allocator_init()
 {
     // initially, we should allocate one large chunk of memory of the max order
     // and add that to the free list
-    mem_area_start = malloc(PAGE_SIZE * (1 << MAX_ORDER));
+    mem_area_start = malloc((MAX_SIZE)*PAGE_SIZE);
     (all_free_areas[MAX_ORDER - 1]).free_list_head = mem_area_start;
     set_forward_link(mem_area_start, mem_area_start);
     set_backward_link(mem_area_start, mem_area_start);
     all_free_areas[MAX_ORDER - 1].nr_free = 1;
+    all_free_areas[MAX_ORDER - 1].allocation_map = 0;
+
+    for (int i = 0; i < MAX_ORDER - 1; i++)
+    {
+        all_free_areas[i].nr_free = 0;
+        all_free_areas[i].allocation_map = 0;
+        all_free_areas[i].free_list_head = NULL;
+    }
 }
 
 void buddy_allocator_terminate()
@@ -38,8 +46,12 @@ void buddy_allocator_terminate()
  * The allocation map should be updated accordingly.
  */
 void *
-alloc_block(size_t order)
+alloc_blocks(size_t order)
 {
+    if (order >= MAX_ORDER)
+    {
+        return NULL;
+    }
     size_t current_order = order;
     void *allocated_block = NULL;
     // first find order that doesn't have an empty free list
@@ -70,10 +82,10 @@ alloc_block(size_t order)
         page_t *buddy_block = split_block(block_to_remove, current_order);
 
         // put the buddy in the free list now (insert at the head)
-        insert_free_block(current_order, buddy_block);
+        // insert will mark this block as free. we don't want to then
+        insert_free_block(buddy_block, current_order);
         allocated_block = block_to_remove;
     }
-    mark_allocated_or_not(allocated_block, order);
     return allocated_block;
 }
 
@@ -125,5 +137,5 @@ void free_blocks(void *addr, size_t order)
 
     // coalesce as much as possible and add the final result to the resulting order
     // might be order - 1
-    insert_free_block(order, addr);
+    insert_free_block(addr, order);
 }

@@ -1,8 +1,9 @@
 #include <stddef.h>
 
-void *alloc_block(size_t order);
+void *alloc_blocks(size_t order);
 void free_blocks(void *addr, size_t order);
 void buddy_allocator_init();
+void buddy_allocator_terminate();
 
 // ranges from 0 ... 10
 #define MAX_ORDER 11
@@ -12,8 +13,8 @@ void buddy_allocator_init();
 typedef struct free_area_struct
 {
     void *free_list_head; // pointer to the first element in the list
-    long allocation_map;
-    long nr_free;
+    long allocation_map;  // keeps track of buddies being allocated or free
+    long nr_free;         // number of free blocks
 } free_area_t;
 
 typedef struct page
@@ -22,4 +23,4 @@ typedef struct page
 } page_t;
 
 free_area_t all_free_areas[MAX_ORDER];
-void *mem_area_start;
+void *mem_area_start; // represents the start of the region of memory used by the buddy allocator
