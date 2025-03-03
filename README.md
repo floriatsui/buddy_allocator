@@ -1,11 +1,11 @@
 # Buddy Allocator
-Goal is to create a really simple memory allocator using the buddy allocator algorithm a la how Linux manages physical memory. The motivation behind this is I remember seeing a buddy allocator in practice and 
+Goal is to create a really simple memory allocator using the buddy allocator algorithm a la how Linux manages physical memory. The motivation behind this is I remember seeing a buddy allocator in practice and being absolutely baffled by what was happening. And what better way to understand something by implementing it myself. The implementation I remember seeing laid out everything in a binary tree layout, which does make a lot of sense. I did not following that implementation. I instead
 
 I want to try writing this in both C and Rust, starting with C... 
 
 ## APIs supported:
-- allocating the number of pages  
-- freeing the pages allocated 
+- allocating the number of pages: `alloc_blocks(order)` where order means I would like 2^order number of pages
+- freeing the pages allocated: `free_blocks(addr, order)` where addr is the address returned from an alloc call and order is the order originally passed in. Yes, I recognize that this puts a lot of responsibility on the developer using the API to maintain the order. Maybe this can be something I can address in the future, but I wanted to keep this design as easy as possible. So, my apologies, the developer will have to remember.  
 
 ## General Plan:
 - create one large block at the start 
@@ -25,6 +25,7 @@ I want to try writing this in both C and Rust, starting with C...
 - Adding tests both for the utility functions as well as stress testing each of the APIs in conjunction with each other
 - Adding a driver program that can offer a command loop as well as a visualizer tool to see what memory looks like 
 - Running this with address sanitizers
+- Maybe modifying block layout to accomodate the order so that it's embedded within the block? 
 
 ## References: 
 - https://students.mimuw.edu.pl/ZSO/Wyklady/06_memory2/BuddySlabAllocator.pdf

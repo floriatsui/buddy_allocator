@@ -14,12 +14,8 @@ void allocation_test()
 }
 
 /**
- * really want to test coalescing
  *
- * Making sure that we only coalesce up until the point that a buddy is allocated
- *
- * Stress
- *
+ * coalescing etc
  *
  */
 void deallocation_test()
@@ -43,5 +39,47 @@ void deallocation_test()
     }
     assert(all_free_areas[MAX_ORDER - 1].nr_free == 1);
 
+    // now we create a scenario in which we need to merge backwards
+    size_t new_order = 4;
+    void *first_allocation = alloc_blocks(4);
+    void *second_allocation = alloc_blocks(4);
+    void *third_allocation = alloc_blocks(4);
+    assert(all_free_areas[new_order].nr_free == 1);
+    assert(all_free_areas[order].nr_free == 0);
+    assert(all_free_areas[order + 1].nr_free == 1);
+
+    // go up by one and allocate there as well
+    // we had to go up a level to split
+    void *another_allocation = alloc_blocks(order);
+    assert(all_free_areas[order].nr_free == 1);
+    // this is because the order allocation would've split the order + 1 block
+    assert(all_free_areas[order + 1].nr_free == 0);
+
+    // and now we free, but nothing can be combined yet
+    free_blocks(second_allocation, new_order);
+    assert(all_free_areas[new_order].nr_free == 2);
+    free_blocks(first_allocation, new_order);
+
+    // we should've coalesced, which means the order above has gotten another block
+    assert(all_free_areas[new_order].nr_free == 1);
+    assert(all_free_areas[order].nr_free == 2);
+    assert(all_free_areas[order + 1].nr_free == 0);
+
+    // now free the third allocation
+    free_blocks(third_allocation, new_order);
+    assert(all_free_areas[new_order].nr_free == 0);
+    assert(all_free_areas[order].nr_free == 1);
+    assert(all_free_areas[order + 1].nr_free == 1);
+
+    // do backwards merge again
+    free_blocks(another_allocation, order);
+    assert(all_free_areas[order].nr_free == 0);
+    assert(all_free_areas[order + 1].nr_free == 0);
+
+    // because there is nothing blocking the rest of the coalescing from happening
+    // we will keep coalescing up until we've reached the maximum order
+    for (int i = order; i < MAX_ORDER - 1; i++)
+        assert(all_free_areas[i].nr_free == 0);
+    assert(all_free_areas[MAX_ORDER - 1].nr_free == 1);
     buddy_allocator_terminate();
 }
