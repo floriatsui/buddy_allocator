@@ -7,6 +7,11 @@ I want to try writing this in both C and Rust, starting with C...
 - allocating the number of pages: `alloc_blocks(order)` where order means I would like 2^order number of pages
 - freeing the pages allocated: `free_blocks(addr, order)` where addr is the address returned from an alloc call and order is the order originally passed in. Yes, I recognize that this puts a lot of responsibility on the developer using the API to maintain the order. Maybe this can be something I can address in the future, but I wanted to keep this design as easy as possible. So, my apologies, the developer will have to remember.  
 
+## To Run: 
+Run `make` in the project directory, that should generate two executables:
+- `test_driver` --> runs all of tests, currently runs all tests all of the time ... sigh I guess I should make this more configurable
+- `buddy_allocator_driver` --> would like to create a CLI tool that can take in commands and allocate and visualize pages, but for now, it's where one would could use the memory allocation in practice.
+
 ## General Plan:
 - create one large block at the start 
 - the rest of the blocks will be created as allocations start

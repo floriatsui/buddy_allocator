@@ -56,7 +56,12 @@ void allocation_checks()
 
 void split_block_checks()
 {
-    // test to make sure that split block results
+    buddy_allocator_init();
+    // test to make sure that split block results in the correct address difference
+    void *block = alloc_blocks(4);
+    void *buddy = split_block(block, 3);
+    assert((char *)block - (char *)buddy == (1 >> 3) * PAGE_SIZE);
+    buddy_allocator_terminate();
 }
 
 void run_all_tests()

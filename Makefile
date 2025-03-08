@@ -3,7 +3,7 @@ CFLAGS = -Wall -g
 all: buddy_allocator_driver test_driver
 
 clean:
-	rm -f buddy_allocator_driver
+	rm -f buddy_allocator_driver test_driver
 
 check: test_driver
 	./test_driver

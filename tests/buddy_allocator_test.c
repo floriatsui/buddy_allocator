@@ -10,7 +10,24 @@
  */
 void allocation_test()
 {
-    // TODO: let's write some tests!
+    buddy_allocator_init();
+    size_t initial_order = 0;
+    void *addr = alloc_blocks(initial_order);
+    for (int i = 0; i < MAX_ORDER - 1; i++)
+    {
+        // we should've split blocks all the way down
+        // which means that we should have one free block in every level
+        assert(all_free_areas[i].nr_free == 1);
+    }
+    void *buddy_addr = alloc_blocks(0);
+    // should only allocate from the buddy
+    assert(all_free_areas[0].nr_free == 0);
+    void *another_block = alloc_blocks(0);
+    // now we should've used the buddy from above and split
+    // which means that we should have another buddy of the 0 size
+    assert(all_free_areas[0].nr_free == 1);
+    assert(all_free_areas[1].nr_free == 0);
+    buddy_allocator_terminate();
 }
 
 /**
@@ -82,4 +99,10 @@ void deallocation_test()
         assert(all_free_areas[i].nr_free == 0);
     assert(all_free_areas[MAX_ORDER - 1].nr_free == 1);
     buddy_allocator_terminate();
+}
+
+void run_all_allocation_tests()
+{
+    allocation_test();
+    deallocation_test();
 }

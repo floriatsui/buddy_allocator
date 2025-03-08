@@ -3,6 +3,6 @@
 int main()
 {
     run_all_tests();
-    deallocation_test();
+    run_all_allocation_tests();
     return 0;
 }
