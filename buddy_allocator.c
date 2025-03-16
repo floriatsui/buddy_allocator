@@ -136,6 +136,5 @@ void free_blocks(void *addr, size_t order)
     }
 
     // coalesce as much as possible and add the final result to the resulting order
-    // might be order - 1
     insert_free_block(addr, order);
 }
