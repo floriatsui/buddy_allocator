@@ -1,5 +1,5 @@
 # Buddy Allocator
-Goal is to create a really simple memory allocator using the buddy allocator algorithm a la how Linux manages physical memory. The motivation behind this is I remember seeing a buddy allocator in practice and being absolutely baffled by what was happening. And what better way to understand something by implementing it myself. The implementation I remember seeing laid out everything in a binary tree layout, which does make a lot of sense. I did not following that implementation. I instead
+Goal is to create a really simple memory allocator using the buddy allocator algorithm a la how Linux manages physical memory. The motivation behind this is I remember seeing a buddy allocator in practice and being absolutely baffled by what was happening. And what better way to understand something by implementing it myself. The implementation I remember seeing laid out everything in a binary tree layout, which does make a lot of sense. I did not following that implementation. I instead just stuck with the block abstraction (mostly because it made the most sense in my head).
 
 I want to try writing this in both C and Rust, starting with C... 
 
@@ -9,8 +9,8 @@ I want to try writing this in both C and Rust, starting with C...
 
 ## To Run: 
 Run `make` in the project directory, that should generate two executables:
-- `test_driver` --> runs all of tests, currently runs all tests all of the time ... sigh I guess I should make this more configurable
-- `buddy_allocator_driver` --> would like to create a CLI tool that can take in commands and allocate and visualize pages, but for now, it's where one would could use the memory allocation in practice.
+- `test_driver` --> runs all of tests, currently runs all tests all of the time ... sigh I guess I should make this more configurable where you can pick and choose the tests that you are running. 
+- `buddy_allocator_driver` --> would like to create a tool that can take in commands and allocate and visualize pages, but for now, it's where one would could use the memory allocation in practice.
 
 ## General Plan:
 - create one large block at the start 
